@@ -41,7 +41,11 @@ namespace json {
 		
 		//重载
 		Json& operator [](int); //针对数组array
+		
+		//支持vector和map形式的append
 		void append(const Json&);
+		void append(const char*, const Json&);
+		void append(const string&, const Json&);
 		
 		Json& operator [](const char*);//针对对象map
 		Json& operator [](const string&);
@@ -49,8 +53,34 @@ namespace json {
 		//以str的形式打印Json的属性和值
 		string str();
 		
-		//重载 = 
+		//重载
 		void operator = (const Json&);
+		bool operator == (const Json&);
+		bool operator != (const Json&);
+
+		bool isNull() const { return m_type == json_null; };
+		bool isBool() const { return m_type == json_bool; };
+		bool isInt() const { return m_type == json_int; };
+		bool isDouble() const { return m_type == json_double; };
+		bool isString() const { return m_type == json_string; };
+		bool isArray() const { return m_type == json_array; };
+		bool isObject() const { return m_type == json_object; };
+
+		//显式转换
+		bool asBool() const;
+		int asInt() const;
+		double asDbouble() const;
+		string asString() const;
+
+		//是否存在元素
+		bool has(int);
+		bool has(const char*);
+		bool has(const string&);
+
+		//移除某个元素或键值对
+		bool remove(int);
+		bool remove(const char*);
+		bool remove(const string&);
 
 	private:
 		union Value {
@@ -75,6 +105,10 @@ namespace json {
 		//copy仅复制, 不考虑清空原有的内容
 		void copy(const Json&);
 		void clear();
+
+		//array与object判断是否相等
+		bool __array_is_equal(const Json&);
+		bool __object_is_equal(const Json&);
 	};
 }
 }

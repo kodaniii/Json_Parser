@@ -140,6 +140,65 @@ void Json::operator = (const Json& rhs) {
 	clear();
 	copy(rhs);
 }
+bool Json::operator == (const Json& rhs) {
+	if (rhs.m_type != m_type) return false;
+	switch (m_type) {
+	case json_null:
+		return true;
+	case json_bool:
+		return m_value.m_bool == rhs.m_value.m_bool;
+	case json_int:
+		return m_value.m_int == rhs.m_value.m_int;
+	case json_double:
+		return m_value.m_double == rhs.m_value.m_double;
+	case json_string:
+		return *(m_value.m_string) == *(rhs.m_value.m_string);
+	case json_array:
+		return __array_is_equal(rhs);
+	case json_object:
+		return __object_is_equal(rhs);
+	default:
+		break;
+	}
+	return false;
+}
+bool Json::operator != (const Json& rhs) {
+	return !(*this == rhs);
+}
+bool Json::__array_is_equal(const Json& rhs) {
+	if (m_type == json_array) {
+		//先判断size是否相同
+		if (m_value.m_array->size() == rhs.m_value.m_array->size()) {
+			auto this_it = m_value.m_array->begin();
+			auto rhs_it = rhs.m_value.m_array->begin();
+			while (this_it != m_value.m_array->end()) {
+				if (*this_it != *rhs_it) return false;
+				this_it++;
+				rhs_it++;
+			}
+			return true;
+		}
+		else return false;
+	}
+	else throw new logic_error("__array_is_equal(): Json_type ERR.");
+}
+bool Json::__object_is_equal(const Json& rhs) {
+	if (m_type == json_object) {
+		//先判断size是否相同
+		if (m_value.m_object->size() == rhs.m_value.m_object->size()) {
+			auto this_it = m_value.m_object->begin();
+			auto rhs_it = rhs.m_value.m_object->begin();
+			while (this_it != m_value.m_object->end()) {
+				if (this_it->first != rhs_it->first || this_it->second != rhs_it->second) return false;
+				this_it++;
+				rhs_it++;
+			}
+			return true;
+		}
+		else return false;
+	}
+	else throw new logic_error("__object_is_equal(): Json_type ERR.");
+}
 Json& Json::operator [](int idx) {
 	if (idx < 0) {
 		throw new logic_error("idx ERR, array[] index < 0.");
@@ -179,7 +238,18 @@ void Json::append(const Json& rhs) {
 	}
 	m_value.m_array->push_back(rhs);
 }
-
+void Json::append(const char* c, const Json& rhs) {
+	string s(c);
+	append(s, rhs);
+}
+void Json::append(const string& s, const Json& rhs) {
+	if (m_type != json_object) {
+		clear();
+		m_type = json_object;
+		m_value.m_object = new map<string, Json>();
+	}
+	m_value.m_object->insert(make_pair(s, rhs));
+}
 void Json::__Json_get(optional<pair<string, string>>& rhs) {
 	stringstream ss;
 	switch (m_type) {
@@ -258,4 +328,64 @@ string Json::str() {
 		ss << "Json::show(): Json_type=json_null." << endl;
 	}
 	return ss.str();
+}
+bool Json::asBool() const {
+	if (m_type != json_bool) {
+		throw new logic_error("type error, m_type is not bool.");
+	}
+	return m_value.m_bool;
+}
+int Json::asInt() const {
+	if (m_type != json_int) {
+		throw new logic_error("type error, m_type is not int.");
+	}
+	return m_value.m_int;
+}
+double Json::asDbouble() const {
+	if (m_type != json_double) {
+		throw new logic_error("type error, m_type is not double.");
+	}
+	return m_value.m_double;
+}
+string Json::asString() const {
+	if (m_type != json_string) {
+		throw new logic_error("type error, m_type is not string.");
+	}
+	return *(m_value.m_string);
+}
+bool Json::has(int idx) {
+	if (m_type != json_array) {
+		return false;
+	}
+	else {
+		return (idx >= 0 && idx < (int)m_value.m_array->size());
+	}
+}
+bool Json::has(const char* rhs) {
+	string s(rhs);
+	return has(s);
+}
+bool Json::has(const string& rhs) {
+	if (m_type != json_object) {
+		return false;
+	}
+	return m_value.m_object->find(rhs) != m_value.m_object->end();
+}
+bool Json::remove(int idx) {
+	if (isArray() && has(idx)) {
+		m_value.m_array->erase(m_value.m_array->begin() + idx);
+		return true;
+	} 
+	else return false;
+}
+bool Json::remove(const char* rhs) {
+	string s(rhs);
+	return remove(s);
+}
+bool Json::remove(const string& rhs) {
+	if (isObject() && has(rhs)) {
+		m_value.m_object->erase(rhs);
+		return true;
+	}
+	else return false;
 }
