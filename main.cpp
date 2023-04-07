@@ -125,7 +125,7 @@ void Json_test() {
 	cout << "tmp_arr1: " << tmp_arr1.str();
 }
 
-void parser_test() {
+void Parser_test() {
 	const string& str = "null"; //注意此处模拟的是传入null, 而不是字符串null
 	Json v;
 	v.parse(str);
@@ -166,11 +166,15 @@ void parser_test() {
 	file_parse(".\\test\\bilibili.json");
 	file_parse(".\\test\\paths.json");
 	file_parse(".\\test\\Random generation.json");
+
+	file_parse(".\\test\\rg1.json");
+	file_parse(".\\test\\rg2.json");
+	file_parse(".\\test\\rg3.json");
 }
 
 int main() {
 	Json_test();
-	parser_test();
+	Parser_test();
 
 	return 0;
 }
