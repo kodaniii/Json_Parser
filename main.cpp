@@ -1,11 +1,13 @@
 #include <iostream>
+#include <sstream>
+#include <fstream>
 #include "json.h"
 
 using std::cout;
 using std::endl;
 using namespace KARINTO::json;
 
-int main() {
+void Json_test() {
 	Json tmp_v1;
 	Json tmp_v2 = true;
 	Json tmp_v3 = 123;
@@ -105,7 +107,56 @@ int main() {
 	cout << "tmp_arr1: " << tmp_arr1.str();
 	tmp_arr1.remove(0);
 	cout << "tmp_arr1: " << tmp_arr1.str();
+}
 
+void parser_test() {
+	const string& str = "null"; //注意此处模拟的是传入null, 而不是字符串null
+	Json v;
+	v.parse(str);
+	cout << v.str();
+	const string& str1 = "false";
+	v.parse(str1);
+	cout << v.str();
+	const string& str2 = "123";
+	v.parse(str2);
+	cout << v.str();
+	const string& str3 = "128.33";
+	v.parse(str3);
+	cout << v.str();
+	const string& str4 = "-128.33";
+	v.parse(str4);
+	cout << v.str();
+
+
+	stringstream ss;
+	
+	ifstream fin(".\\test\\string1.txt"); //内容:"hello \"\" \\\world~", 冒号后是文件的内容, 含双引号,下同
+	ss << fin.rdbuf();
+	v.parse(ss.str());
+	ss.str("");
+	cout << v.str();
+	fin.clear();
+	fin.close();
+
+	fin.open(".\\test\\string2.txt"); //内容:". gasgagweagh 			)", 中间有一部分是\t
+	ss << fin.rdbuf();
+	v.parse(ss.str());
+	ss.str("");
+	cout << v.str();
+	fin.clear();
+	fin.close();
+
+	fin.open(".\\test\\string3.txt"); //内容:                 ".", 测试__skip()
+	ss << fin.rdbuf();
+	v.parse(ss.str());
+	ss.str("");
+	cout << v.str();
+	fin.clear();
+	fin.close();
+}
+
+int main() {
+	parser_test();
 
 	return 0;
 }

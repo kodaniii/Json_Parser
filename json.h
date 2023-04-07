@@ -82,6 +82,9 @@ namespace json {
 		bool remove(const char*);
 		bool remove(const string&);
 
+
+		void parse(const string&);
+
 	private:
 		union Value {
 			bool m_bool;

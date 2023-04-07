@@ -1,4 +1,5 @@
 #include "json.h"
+#include "parser.h"
 #include <sstream>
 #include <string>
 
@@ -275,7 +276,7 @@ void Json::__Json_get(optional<pair<string, string>>& rhs) {
 		rhs = { "json_object", __Json_value_string() };
 		break;
 	default:
-		rhs= { "ERR_type","ERR_type" };
+		rhs= { "ERR_type: " + m_type, "ERR_type" };
 	}
 }
 string Json::__Json_value_string() {
@@ -292,6 +293,7 @@ string Json::__Json_value_string() {
 		ss << m_value.m_double;
 		break;
 	case json_string:
+		//这里自动补充双引号"", 后续解析中双引号就不需要自动添加了
 		ss << "\"" << *(m_value.m_string) << "\"";
 		break;
 	case json_array:
@@ -388,4 +390,9 @@ bool Json::remove(const string& rhs) {
 		return true;
 	}
 	else return false;
+}
+void Json::parse(const string& rhs) {
+	Parser p;
+	p.init(rhs);
+	*this = p.token_parse();
 }
