@@ -5,7 +5,7 @@
 
 using std::cout;
 using std::endl;
-using namespace KARINTO::json;
+using namespace Kodaniii::json;
 
 void file_parse(const char* rhs) {
 	stringstream ss;

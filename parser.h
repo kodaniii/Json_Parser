@@ -3,7 +3,7 @@
 #include <string>
 using std::string;
 
-namespace KARINTO {
+namespace Kodaniii {
 
 namespace json {
 	//解析器, 存放了字符串和指针
@@ -22,7 +22,7 @@ namespace json {
 		//再解析"开头的, 视为parse_string类型
 		//再解析[开头的, 视为parse_array类型
 		//再解析{开头的, 视为parse_object类型
-		Json token_parse();
+		Json json_parse();
 
 	private:
 		string m_str;

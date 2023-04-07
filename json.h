@@ -8,7 +8,7 @@
 
 using namespace std;
 
-namespace KARINTO{
+namespace Kodaniii {
 
 namespace json {
 	class Json {
@@ -83,7 +83,7 @@ namespace json {
 		bool remove(const char*);
 		bool remove(const string&);
 
-
+		//新建Parser对象, 初始化并解析, 返回解析结果
 		void parse(const string&);
 
 	private:

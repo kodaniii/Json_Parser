@@ -3,7 +3,7 @@
 #include <sstream>
 #include <string>
 
-using namespace KARINTO::json;
+using namespace Kodaniii::json;
 
 Json::Json() : m_type(json_null) {}
 Json::Json(bool value) : m_type(json_bool) {
@@ -404,5 +404,5 @@ bool Json::remove(const string& rhs) {
 void Json::parse(const string& rhs) {
 	Parser p;
 	p.init(rhs);
-	*this = p.token_parse();
+	*this = p.json_parse(); //返回Json对象给this指向的Json
 }

@@ -1,6 +1,6 @@
 #include "parser.h"
 
-using namespace KARINTO::json;
+using namespace Kodaniii::json;
 
 Parser::Parser() :m_str(""), m_idx(0) {}
 void Parser::init(const string& rhs) {
@@ -16,7 +16,7 @@ char Parser::__get_first_char() {
 	__skip();
 	return m_str[m_idx];
 }
-Json Parser::token_parse() {
+Json Parser::json_parse() {
 	char ch = __get_first_char();
 	switch(ch) {
 	case 'n':
@@ -156,7 +156,7 @@ Json Parser::parse_array() {
 	}
 	while (true) {
 		//调用token_parse解析下一个词
-		arr.append(token_parse());
+		arr.append(json_parse());
 		ch = __get_first_char(); //ch指向下一个词首字符
 		//结束
 		if (ch == ']') {
@@ -192,7 +192,7 @@ Json Parser::parse_object() {
 		}
 		m_idx++;
 		ch = __get_first_char();
-		Json value = token_parse();
+		Json value = json_parse();
 		obj.append(key, value);
 		ch = __get_first_char();
 		//object结束
