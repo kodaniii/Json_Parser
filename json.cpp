@@ -309,7 +309,7 @@ string Json::__Json_value_string() {
 		ss << "{";
 		for (auto it = m_value.m_object->begin(); it != m_value.m_object->end(); it++) {
 			if (it != m_value.m_object->begin()) ss << ", ";
-			ss << it->first << ": " << it->second.__Json_value_string();
+			ss << "\"" << it->first << "\": " << it->second.__Json_value_string();
 		}
 		ss << "}";
 	default:
@@ -317,7 +317,7 @@ string Json::__Json_value_string() {
 	}
 	return ss.str();
 }
-string Json::str() {
+string Json::show_detailed() {
 	stringstream ss;
 	optional<pair<string, string>> optional_p;
 	__Json_get(optional_p);
@@ -329,6 +329,16 @@ string Json::str() {
 	else {
 		ss << "Json::show(): Json_type=json_null." << endl;
 	}
+	return ss.str();
+}
+string Json::str() {
+	stringstream ss;
+	optional<pair<string, string>> optional_p;
+	__Json_get(optional_p);
+	if (optional_p.has_value()) {
+		ss << optional_p.value().second;
+	}
+	ss << endl;
 	return ss.str();
 }
 bool Json::asBool() const {

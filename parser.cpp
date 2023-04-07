@@ -1,7 +1,5 @@
 #include "parser.h"
 
-#include <iostream>
-
 using namespace KARINTO::json;
 
 Parser::Parser() :m_str(""), m_idx(0) {}
@@ -39,7 +37,7 @@ Json Parser::token_parse() {
 	case '9':
 		return parse_number();
 	case '\"':
-		//注意传进去的第一位是", 这里没有过滤, 在__get_string()中过滤
+		//注意传进去的第一位是", 这里没有过滤, 在__get_string()中过滤, 下同
 		return parse_string();
 	case '[':
 		return parse_array();
@@ -52,15 +50,18 @@ Json Parser::token_parse() {
 }
 Json Parser::parse_null() {
 	if (m_str.compare(m_idx, 4, "null") == 0) {
+		m_idx += 4; //保证退出时指向true的下一位字符
 		return Json();
 	}
 	throw new logic_error("Parser::parse_null() ERR: m_str is not null.");
 }
 Json Parser::parse_bool() {
 	if (m_str.compare(m_idx, 4, "true") == 0) {
+		m_idx += 4; //保证退出时指向true的下一位字符
 		return Json(true);
 	}
 	else if (m_str.compare(m_idx, 5, "false") == 0) {
+		m_idx += 5;
 		return Json(false);
 	}
 	throw new logic_error("Parser::parse_null() ERR: m_str is not a bool.");
@@ -131,6 +132,7 @@ string Parser::__get_string() {
 			default:
 				s += '\\'; //没有被转义的情况
 				s += ch;
+				m_idx++;
 				break;
 			}
 		}
@@ -144,9 +146,66 @@ Json Parser::parse_string() {
 	string s = __get_string();
 	return Json(s);
 }
+//[1, 2, 3]
 Json Parser::parse_array() {
-	return Json();
+	Json arr(Json::json_array); //Json(json_type);
+	char ch = m_str[++m_idx]; //ch为[后第一个字符
+	//空数组, 结束
+	if (ch == ']') {
+		return arr;
+	}
+	while (true) {
+		//调用token_parse解析下一个词
+		arr.append(token_parse());
+		ch = __get_first_char(); //ch指向下一个词首字符
+		//结束
+		if (ch == ']') {
+			m_idx++; //指向]的下一位字符
+			break;
+		}
+		//如果还有Json数据应以逗号隔开
+		if (ch != ',') {
+			throw new logic_error("parse_array() ERR: array value error.");
+		}
+		m_idx++;
+		ch = __get_first_char(); //[1, 2, 3]指向下个字符为空格会报错
+	}
+	return arr;
 }
+//{"string" : 123, "string2" : 234}
 Json Parser::parse_object() {
-	return Json();
+	Json obj(Json::json_object);
+	m_idx++;
+	char ch =__get_first_char(); //ch为{后第一个字符
+	if (ch == '}') {
+		return obj;
+	}
+	while (true) {
+		//key的string形式必须以"开头
+		if (ch != '\"') {
+			throw new logic_error("parse_object() ERR-1: object value error.");
+		}
+		string key = __get_string();
+		ch = __get_first_char(); //过滤
+		if (ch != ':') { //冒号作为分隔
+			throw new logic_error("parse_object() ERR-2: object value error.");
+		}
+		m_idx++;
+		ch = __get_first_char();
+		Json value = token_parse();
+		obj.append(key, value);
+		ch = __get_first_char();
+		//object结束
+		if (ch == '}') {
+			m_idx++;
+			break;
+		}
+		//没有结束, 应用逗号作为分隔
+		if (ch != ',') {
+			throw new logic_error("parse_object() ERR-3: object value error.");
+		}
+		m_idx++;
+		ch = __get_first_char();
+	}
+	return obj;
 }

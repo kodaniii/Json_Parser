@@ -7,6 +7,19 @@ using std::cout;
 using std::endl;
 using namespace KARINTO::json;
 
+void file_parse(const char* rhs) {
+	stringstream ss;
+	Json v;
+
+	ifstream fin(rhs);
+	ss << fin.rdbuf();
+	v.parse(ss.str());
+	cout << v.str();
+	ss.str("");
+	fin.clear();
+	fin.close();
+}
+
 void Json_test() {
 	Json tmp_v1;
 	Json tmp_v2 = true;
@@ -32,8 +45,10 @@ void Json_test() {
 	double tmp_d2 = tmp_arr[2];
 	string tmp_s2 = tmp_arr[3];
 
+	cout << tmp_v1.show_detailed();
 	cout << tmp_v1.str() << tmp_v2.str() << tmp_v3.str()
 		<< tmp_v4.str() << tmp_v5.str() << tmp_arr.str();
+	cout << tmp_arr.show_detailed();
 
 	Json tmp_o; //map<string, Json>
 
@@ -43,6 +58,7 @@ void Json_test() {
 	tmp_o["double"] = 256.99;
 	tmp_o["str"] = "this is string";
 	tmp_o["array"] = tmp_arr;
+	cout << tmp_o.show_detailed();
 	cout << tmp_o.str();
 
 	tmp_v1 = tmp_arr;
@@ -127,35 +143,33 @@ void parser_test() {
 	v.parse(str4);
 	cout << v.str();
 
+	file_parse(".\\test\\string1.txt"); //内容:"hello \"\" \\\world~", 冒号后是文件的内容, 含双引号,下同
+	file_parse(".\\test\\string2.txt"); //内容:". gasgagweagh 			)", 中间有一部分是\t
+	file_parse(".\\test\\string3.txt"); //内容:                 ".", 测试__skip()
 
-	stringstream ss;
+	const string& str5 = "[1, 3, 5]";
+	v.parse(str5);
+	cout << v.str();
+
+	const string& str6 = "[\"hello, world\", 3, 5, \"C\"]";
+	v.parse(str6);
+	cout << v.str();
+
+	file_parse(".\\test\\string4.txt"); //内容:["hello,world", 3, 5, 'c'], 同str6
+
+	const string& str7 = "{\"key1\": 123, \"key2\": 456}";
+	v.parse(str7);
+	cout << v.str();
+	file_parse(".\\test\\string5.txt"); //内容太长了emm...
 	
-	ifstream fin(".\\test\\string1.txt"); //内容:"hello \"\" \\\world~", 冒号后是文件的内容, 含双引号,下同
-	ss << fin.rdbuf();
-	v.parse(ss.str());
-	ss.str("");
-	cout << v.str();
-	fin.clear();
-	fin.close();
-
-	fin.open(".\\test\\string2.txt"); //内容:". gasgagweagh 			)", 中间有一部分是\t
-	ss << fin.rdbuf();
-	v.parse(ss.str());
-	ss.str("");
-	cout << v.str();
-	fin.clear();
-	fin.close();
-
-	fin.open(".\\test\\string3.txt"); //内容:                 ".", 测试__skip()
-	ss << fin.rdbuf();
-	v.parse(ss.str());
-	ss.str("");
-	cout << v.str();
-	fin.clear();
-	fin.close();
+	//综合测试
+	file_parse(".\\test\\bilibili.json");
+	file_parse(".\\test\\paths.json");
+	file_parse(".\\test\\Random generation.json");
 }
 
 int main() {
+	Json_test();
 	parser_test();
 
 	return 0;

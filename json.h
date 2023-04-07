@@ -51,7 +51,8 @@ namespace json {
 		Json& operator [](const string&);
 		
 		//以str的形式打印Json的属性和值
-		string str();
+		string str(); //以Json的形式输出
+		string show_detailed(); //打印所有信息
 		
 		//重载
 		void operator = (const Json&);
