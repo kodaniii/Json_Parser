@@ -185,7 +185,6 @@ bool Json::__array_is_equal(const Json& rhs) {
 }
 bool Json::__object_is_equal(const Json& rhs) {
 	if (m_type == json_object) {
-		//先判断size是否相同
 		if (m_value.m_object->size() == rhs.m_value.m_object->size()) {
 			auto this_it = m_value.m_object->begin();
 			auto rhs_it = rhs.m_value.m_object->begin();

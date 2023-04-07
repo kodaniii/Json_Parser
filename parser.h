@@ -28,9 +28,9 @@ namespace json {
 		string m_str;
 		int m_idx;
 
+		/*以下函数运行后, 该格式的结尾字符指向下一个指针m_idx*/
 		Json parse_null();
 		Json parse_bool();
-		//运行后, 该格式的结尾字符指向下一个指针m_idx
 		Json parse_number();
 		//string只需要传内容, 不需要传外侧双引号""
 		//因为Json类的m_value.m_string指针指向的内容已经自动添加了双引号
@@ -40,7 +40,7 @@ namespace json {
 
 		//过滤
 		void __skip();
-		//获取下一个token的首字符
+		//过滤并获取下一个token的首字符
 		char __get_first_char();
 		//将一个token转换成string
 		string __get_string();

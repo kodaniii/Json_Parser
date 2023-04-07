@@ -83,7 +83,7 @@ namespace json {
 		bool remove(const char*);
 		bool remove(const string&);
 
-		//新建Parser对象, 初始化并解析, 返回解析结果
+		//新建Parser对象, 初始化并调用json解析函数, 返回解析结果给Json类
 		void parse(const string&);
 
 	private:
@@ -99,7 +99,7 @@ namespace json {
 		Json_type m_type;
 		Value m_value;
 
-		//返回Json的type和value, 如果type类型为null, optional=nullopt
+		//修改rhs的值为Json的type和value, 如果type类型为null, optional=nullopt
 		void __Json_get(optional<pair<string, string>>&);
 		//以string形式返回Json对应value, type类型为null时不被调用, 因此忽略
 		string __Json_value_string();
