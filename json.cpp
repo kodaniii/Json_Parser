@@ -3,8 +3,6 @@
 #include <sstream>
 #include <string>
 
-#include <iostream>
-
 using namespace Kodaniii::json;
 
 Json::Json() : m_type(json_null) {}
