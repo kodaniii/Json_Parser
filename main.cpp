@@ -58,8 +58,11 @@ void Json_test() {
 	tmp_o["double"] = 256.99;
 	tmp_o["str"] = "this is string";
 	tmp_o["array"] = tmp_arr;
+
+
 	cout << tmp_o.show_detailed();
 	cout << tmp_o.str();
+
 
 	tmp_v1 = tmp_arr;
 	cout << "------json_null to json_array------\n" << tmp_v1.str();
@@ -79,25 +82,25 @@ void Json_test() {
 	Json tmp_arr1;
 	tmp_arr1[0] = true;
 	tmp_arr1[1] = 123;
-
 	tmp_arr1.append(128.33);
 	tmp_arr1.append("nice day~");
 
 	Json tmp_arr2;
 	tmp_arr2[0] = true;
 	tmp_arr2[1] = 123;
-
 	tmp_arr2.append(128.33);
-	tmp_arr2.append("not a nice day~");
+	tmp_arr2.append(move(string("not a nice day~")));
 
 	Json tmp_o1; //map<string, Json>
 	Json tmp_o2; //map<string, Json>
+
 	tmp_o1["bool"] = true;
 	tmp_o1["int"] = 128;
 	tmp_o1["float"] = 128.33;
 	tmp_o1["double"] = 256.99;
 	tmp_o1["str"] = "this is string";
 	tmp_o1["array"] = tmp_arr1;
+
 	tmp_o2["bool"] = true;
 	tmp_o2["int"] = 128;
 	tmp_o2["float"] = 128.33;
@@ -123,6 +126,15 @@ void Json_test() {
 	cout << "tmp_arr1: " << tmp_arr1.str();
 	tmp_arr1.remove(0);
 	cout << "tmp_arr1: " << tmp_arr1.str();
+
+
+	/*--------右值引用--------*/
+	tmp_o1 = move(tmp_arr1);
+	cout << "tmp_o1: " << tmp_o1.show_detailed(); //此时tmp_arr1已被析构不可被调用
+	string rm1 = "int";
+	tmp_o2.remove(move(rm1));
+	cout << "tmp_o2: " << tmp_o2.show_detailed();
+
 }
 
 void Parser_test() {

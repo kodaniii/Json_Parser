@@ -29,8 +29,10 @@ namespace json {
 		Json(double);
 		Json(const char*);  //string
 		Json(const string&);//string
+		Json(const string&&);
 		Json(const Json_type);
 		Json(const Json&);
+		Json(const Json&&);
 		~Json();
 
 		//转换函数
@@ -43,21 +45,32 @@ namespace json {
 		Json& operator [](int); //针对数组array
 		
 		//支持vector和map形式的append
+		//vector/array
 		void append(const Json&);
+		void append(const Json&&);
+		//map/object
 		void append(const char*, const Json&);
+		void append(const char*, const Json&&);
 		void append(const string&, const Json&);
+		void append(const string&, const Json&&);
+		void append(const string&&, const Json&);
+		void append(const string&&, const Json&&);
 		
 		Json& operator [](const char*);//针对对象map
 		Json& operator [](const string&);
-		
+		Json& operator [](const string&&);
+
 		//以str的形式打印Json的属性和值
 		string str(); //以Json的形式输出
 		string show_detailed(); //打印所有信息
 		
 		//重载
 		void operator = (const Json&);
+		void operator = (const Json&&);
 		bool operator == (const Json&);
+		bool operator == (const Json&&);
 		bool operator != (const Json&);
+		bool operator != (const Json&&);
 
 		bool isNull() const { return m_type == json_null; };
 		bool isBool() const { return m_type == json_bool; };
@@ -77,14 +90,18 @@ namespace json {
 		bool has(int);
 		bool has(const char*);
 		bool has(const string&);
+		bool has(const string&&);
 
 		//移除某个元素或键值对
 		bool remove(int);
 		bool remove(const char*);
 		bool remove(const string&);
+		bool remove(const string&&);
 
 		//新建Parser对象, 初始化并调用json解析函数, 返回解析结果给Json类
+		void parse(const char*);
 		void parse(const string&);
+		void parse(const string&&);
 
 	private:
 		union Value {
@@ -107,12 +124,26 @@ namespace json {
 
 		//复制和清空
 		//copy仅复制, 不考虑清空原有的内容
-		void copy(const Json&);
-		void clear();
+		template<class T>
+		void __copy(const T&&);
+		void __clear();
 
 		//array与object判断是否相等
-		bool __array_is_equal(const Json&);
-		bool __object_is_equal(const Json&);
+		template<class T>
+		bool __array_is_equal(const T&&);
+		template<class T>
+		bool __object_is_equal(const T&&);
+
+		//append_array
+		template<class C>
+		void __append_array(const C&&);
+		//append_object
+		template<typename Ty, class C>
+		void __append_object(const Ty&&, const C&&);
+		
+		//parse
+		template<typename Ty>
+		void __parse(const Ty&&);
 	};
 }
 }

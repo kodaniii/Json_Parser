@@ -3,6 +3,8 @@
 #include <sstream>
 #include <string>
 
+#include <iostream>
+
 using namespace Kodaniii::json;
 
 Json::Json() : m_type(json_null) {}
@@ -19,6 +21,9 @@ Json::Json(const char* value) : m_type(json_string) {
 	m_value.m_string = new string(value);
 }
 Json::Json(const string& value) :m_type(json_string) {
+	m_value.m_string = new string(value);
+}
+Json::Json(const string&& value) : m_type(json_string) {
 	m_value.m_string = new string(value);
 }
 Json::Json(Json_type type) : m_type(type) {
@@ -48,12 +53,40 @@ Json::Json(Json_type type) : m_type(type) {
 	}
 }
 Json::Json(const Json& rhs) {
-	copy(rhs);
+	__copy<const Json&>(rhs);
+}
+Json::Json(const Json&& rhs) {
+	m_type = rhs.m_type;
+	switch (m_type) {
+	case json_null:
+		break;
+	case json_bool:
+		m_value.m_bool = rhs.m_value.m_bool;
+		break;
+	case json_int:
+		m_value.m_int = rhs.m_value.m_int;
+		break;
+	case json_double:
+		m_value.m_double = rhs.m_value.m_double;
+		break;
+	case json_string:
+		m_value.m_string = new string(*rhs.m_value.m_string);
+		break;
+	case json_array:
+		m_value.m_array = new vector(*rhs.m_value.m_array);
+		break;
+	case json_object:
+		m_value.m_object = new map(*rhs.m_value.m_object);
+		break;
+	default:
+		break;
+	}
 }
 Json::~Json() {
-	clear();
+	__clear();
 }
-void Json::copy(const Json& rhs) {
+template<class T>
+void Json::__copy(const T&& rhs) {
 	m_type = rhs.m_type;
 	switch (m_type) {
 	case json_null:
@@ -82,7 +115,7 @@ void Json::copy(const Json& rhs) {
 		break;
 	}
 }
-void Json::clear() {
+void Json::__clear() {
 	switch (m_type) {
 	case json_null:
 		break;
@@ -138,8 +171,12 @@ Json::operator string() {
 	return *(m_value.m_string);
 }
 void Json::operator = (const Json& rhs) {
-	clear();
-	copy(rhs);
+	__clear();
+	__copy<const Json&>(rhs);
+}
+void Json::operator = (const Json&& rhs) {
+	__clear();
+	__copy<const Json&>(rhs);
 }
 bool Json::operator == (const Json& rhs) {
 	if (rhs.m_type != m_type) return false;
@@ -155,9 +192,31 @@ bool Json::operator == (const Json& rhs) {
 	case json_string:
 		return *(m_value.m_string) == *(rhs.m_value.m_string);
 	case json_array:
-		return __array_is_equal(rhs);
+		return __array_is_equal<const Json&>(rhs);
 	case json_object:
-		return __object_is_equal(rhs);
+		return __object_is_equal<const Json&>(rhs);
+	default:
+		break;
+	}
+	return false;
+}
+bool Json::operator == (const Json&& rhs) {
+	if (rhs.m_type != m_type) return false;
+	switch (m_type) {
+	case json_null:
+		return true;
+	case json_bool:
+		return m_value.m_bool == rhs.m_value.m_bool;
+	case json_int:
+		return m_value.m_int == rhs.m_value.m_int;
+	case json_double:
+		return m_value.m_double == rhs.m_value.m_double;
+	case json_string:
+		return *(m_value.m_string) == *(rhs.m_value.m_string);
+	case json_array:
+		return __array_is_equal<const Json&>(rhs);
+	case json_object:
+		return __object_is_equal<const Json&>(rhs);
 	default:
 		break;
 	}
@@ -166,7 +225,11 @@ bool Json::operator == (const Json& rhs) {
 bool Json::operator != (const Json& rhs) {
 	return !(*this == rhs);
 }
-bool Json::__array_is_equal(const Json& rhs) {
+bool Json::operator != (const Json&& rhs) {
+	return !(*this == rhs);
+}
+template<class T>
+bool Json::__array_is_equal(const T&& rhs) {
 	if (m_type == json_array) {
 		//先判断size是否相同
 		if (m_value.m_array->size() == rhs.m_value.m_array->size()) {
@@ -183,7 +246,8 @@ bool Json::__array_is_equal(const Json& rhs) {
 	}
 	else throw new logic_error("__array_is_equal(): Json_type ERR.");
 }
-bool Json::__object_is_equal(const Json& rhs) {
+template<class T>
+bool Json::__object_is_equal(const T&& rhs) {
 	if (m_type == json_object) {
 		if (m_value.m_object->size() == rhs.m_value.m_object->size()) {
 			auto this_it = m_value.m_object->begin();
@@ -204,7 +268,7 @@ Json& Json::operator [](int idx) {
 		throw new logic_error("idx ERR, array[] index < 0.");
 	}
 	if (m_type != json_array) {
-		clear();
+		__clear();
 		m_type = json_array;
 		m_value.m_array = new vector<Json>();
 	}
@@ -223,28 +287,58 @@ Json& Json::operator [](const char* key) {
 }
 Json& Json::operator [](const string& key) {
 	if (m_type != json_object) {
-		clear();
+		__clear();
 		m_type = json_object;
 		m_value.m_object = new map<string, Json>();
 	}
 	//如果map中key不存在, 直接生成默认的value
 	return (*m_value.m_object)[key];
 }
+Json& Json::operator [](const string&& key) {
+	if (m_type != json_object) {
+		__clear();
+		m_type = json_object;
+		m_value.m_object = new map<string, Json>();
+	}
+	return (*m_value.m_object)[key];
+}
 void Json::append(const Json& rhs) {
+	__append_array<const Json&>(rhs);
+}
+void Json::append(const Json&& rhs) {
+	__append_array<const Json&>(rhs);
+}
+template<class C>
+void Json::__append_array(const C&& rhs) {
 	if (m_type != json_array) {
-		clear();
+		__clear();
 		m_type = json_array;
 		m_value.m_array = new vector<Json>();
 	}
 	m_value.m_array->push_back(rhs);
 }
 void Json::append(const char* c, const Json& rhs) {
-	string s(c);
-	append(s, rhs);
+	__append_object<const string&&, const Json&>(c, rhs);
+}
+void Json::append(const char* c, const Json&& rhs) {
+	__append_object<const string&&, const Json&>(c, rhs);
 }
 void Json::append(const string& s, const Json& rhs) {
+	__append_object<const string&, const Json&>(s, rhs);
+}
+void Json::append(const string& s, const Json&& rhs) {
+	__append_object<const string&, const Json&>(s, rhs);
+}
+void Json::append(const string&& s, const Json& rhs) {
+	__append_object<const string&, const Json&>(s, rhs);
+}
+void Json::append(const string&& s, const Json&& rhs) {
+	__append_object<const string&, const Json&>(s, rhs);
+}
+template<typename Ty, class C>
+void Json::__append_object(const Ty&& s, const C&& rhs) {
 	if (m_type != json_object) {
-		clear();
+		__clear();
 		m_type = json_object;
 		m_value.m_object = new map<string, Json>();
 	}
@@ -373,10 +467,15 @@ bool Json::has(int idx) {
 	}
 }
 bool Json::has(const char* rhs) {
-	string s(rhs);
-	return has(s);
+	return has(string(rhs));
 }
 bool Json::has(const string& rhs) {
+	if (m_type != json_object) {
+		return false;
+	}
+	return m_value.m_object->find(rhs) != m_value.m_object->end();
+}
+bool Json::has(const string&& rhs) {
 	if (m_type != json_object) {
 		return false;
 	}
@@ -390,8 +489,7 @@ bool Json::remove(int idx) {
 	else return false;
 }
 bool Json::remove(const char* rhs) {
-	string s(rhs);
-	return remove(s);
+	return remove(string(rhs));
 }
 bool Json::remove(const string& rhs) {
 	if (isObject() && has(rhs)) {
@@ -400,7 +498,24 @@ bool Json::remove(const string& rhs) {
 	}
 	else return false;
 }
+bool Json::remove(const string&& rhs) {
+	if (isObject() && has(rhs)) {
+		m_value.m_object->erase(rhs);
+		return true;
+	}
+	else return false;
+}
+void Json::parse(const char* c) {
+	__parse<const string&&>(c);
+}
 void Json::parse(const string& rhs) {
+	__parse<const string&>(rhs);
+}
+void Json::parse(const string&& rhs) {
+	__parse<const string&>(rhs);
+}
+template<typename Ty>
+void Json::__parse(const Ty&& rhs) {
 	Parser p;
 	p.init(rhs);
 	*this = p.json_parse(); //返回Json对象给this指向的Json

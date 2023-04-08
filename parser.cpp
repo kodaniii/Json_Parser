@@ -112,7 +112,7 @@ string Parser::__get_string() {
 			switch (ch) {
 			case '\"':
 			case '\\':
-			case '\/':
+			case '/':
 			case '\b':
 			case '\f':
 			case '\n':
