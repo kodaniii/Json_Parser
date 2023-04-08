@@ -174,7 +174,7 @@ void Json::operator = (const Json& rhs) {
 }
 void Json::operator = (const Json&& rhs) {
 	__clear();
-	__copy<const Json&>(rhs);
+	__copy<const Json&&>(forward<const Json>(rhs));
 }
 bool Json::operator == (const Json& rhs) {
 	if (rhs.m_type != m_type) return false;
@@ -212,9 +212,9 @@ bool Json::operator == (const Json&& rhs) {
 	case json_string:
 		return *(m_value.m_string) == *(rhs.m_value.m_string);
 	case json_array:
-		return __array_is_equal<const Json&>(rhs);
+		return __array_is_equal<const Json&&>(forward<const Json>(rhs));
 	case json_object:
-		return __object_is_equal<const Json&>(rhs);
+		return __object_is_equal<const Json&&>(forward<const Json>(rhs));
 	default:
 		break;
 	}
@@ -304,7 +304,7 @@ void Json::append(const Json& rhs) {
 	__append_array<const Json&>(rhs);
 }
 void Json::append(const Json&& rhs) {
-	__append_array<const Json&>(rhs);
+	__append_array<const Json&&>(forward<const Json>(rhs));
 }
 template<class C>
 void Json::__append_array(const C&& rhs) {
@@ -319,19 +319,19 @@ void Json::append(const char* c, const Json& rhs) {
 	__append_object<const string&&, const Json&>(c, rhs);
 }
 void Json::append(const char* c, const Json&& rhs) {
-	__append_object<const string&&, const Json&>(c, rhs);
+	__append_object<const string&&, const Json&&>(c, forward<const Json>(rhs));
 }
 void Json::append(const string& s, const Json& rhs) {
 	__append_object<const string&, const Json&>(s, rhs);
 }
 void Json::append(const string& s, const Json&& rhs) {
-	__append_object<const string&, const Json&>(s, rhs);
+	__append_object<const string&, const Json&&>(s, forward<const Json>(rhs));
 }
 void Json::append(const string&& s, const Json& rhs) {
-	__append_object<const string&, const Json&>(s, rhs);
+	__append_object<const string&&, const Json&>(forward<const string>(s), rhs);
 }
 void Json::append(const string&& s, const Json&& rhs) {
-	__append_object<const string&, const Json&>(s, rhs);
+	__append_object<const string&&, const Json&&>(forward<const string>(s), forward<const Json>(rhs));
 }
 template<typename Ty, class C>
 void Json::__append_object(const Ty&& s, const C&& rhs) {
@@ -414,8 +414,8 @@ string Json::show_detailed() {
 	__Json_get(optional_p);
 	if (optional_p.has_value()) {
 		ss << "Json::show(): Json_type=" << optional_p.value().first
-			<< ",\tJson_value=" << optional_p.value().second 
-			 << "." << endl;
+			<< ",\tJson_value=" << optional_p.value().second
+			<< "." << endl;
 	}
 	else {
 		ss << "Json::show(): Json_type=json_null." << endl;
@@ -510,7 +510,7 @@ void Json::parse(const string& rhs) {
 	__parse<const string&>(rhs);
 }
 void Json::parse(const string&& rhs) {
-	__parse<const string&>(rhs);
+	__parse<const string&&>(forward<const string>(rhs));
 }
 template<typename Ty>
 void Json::__parse(const Ty&& rhs) {
