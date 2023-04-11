@@ -54,31 +54,7 @@ Json::Json(const Json& rhs) {
 	__copy<const Json&>(rhs);
 }
 Json::Json(const Json&& rhs) {
-	m_type = rhs.m_type;
-	switch (m_type) {
-	case json_null:
-		break;
-	case json_bool:
-		m_value.m_bool = rhs.m_value.m_bool;
-		break;
-	case json_int:
-		m_value.m_int = rhs.m_value.m_int;
-		break;
-	case json_double:
-		m_value.m_double = rhs.m_value.m_double;
-		break;
-	case json_string:
-		m_value.m_string = new string(*rhs.m_value.m_string);
-		break;
-	case json_array:
-		m_value.m_array = new vector(*rhs.m_value.m_array);
-		break;
-	case json_object:
-		m_value.m_object = new map(*rhs.m_value.m_object);
-		break;
-	default:
-		break;
-	}
+	__copy<const Json&&>(forward<const Json>(rhs));
 }
 Json::~Json() {
 	__clear();
