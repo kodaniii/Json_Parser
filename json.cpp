@@ -60,7 +60,7 @@ Json::~Json() {
 	__clear();
 }
 template<class T>
-void Json::__copy(const T&& rhs) {
+void Json::__copy(const T&& rhs) noexcept {
 	m_type = rhs.m_type;
 	switch (m_type) {
 	case json_null:
@@ -144,7 +144,7 @@ Json::operator string() {
 	}
 	return *(m_value.m_string);
 }
-void Json::operator = (const Json& rhs) {
+void Json::operator = (const Json& rhs) noexcept {
 	__clear();
 	__copy<const Json&>(rhs);
 }
@@ -174,7 +174,7 @@ bool Json::operator == (const Json& rhs) {
 	}
 	return false;
 }
-bool Json::operator == (const Json&& rhs) {
+bool Json::operator == (const Json&& rhs) noexcept {
 	if (rhs.m_type != m_type) return false;
 	switch (m_type) {
 	case json_null:
@@ -199,11 +199,11 @@ bool Json::operator == (const Json&& rhs) {
 bool Json::operator != (const Json& rhs) {
 	return !(*this == rhs);
 }
-bool Json::operator != (const Json&& rhs) {
+bool Json::operator != (const Json&& rhs) noexcept {
 	return !(*this == rhs);
 }
 template<class T>
-bool Json::__array_is_equal(const T&& rhs) {
+bool Json::__array_is_equal(const T&& rhs) noexcept {
 	if (m_type == json_array) {
 		//先判断size是否相同
 		if (m_value.m_array->size() == rhs.m_value.m_array->size()) {
@@ -279,11 +279,11 @@ Json& Json::operator [](const string&& key) {
 void Json::append(const Json& rhs) {
 	__append_array<const Json&>(rhs);
 }
-void Json::append(const Json&& rhs) {
+void Json::append(const Json&& rhs) noexcept {
 	__append_array<const Json&&>(forward<const Json>(rhs));
 }
 template<class C>
-void Json::__append_array(const C&& rhs) {
+void Json::__append_array(const C&& rhs) noexcept {
 	if (m_type != json_array) {
 		__clear();
 		m_type = json_array;

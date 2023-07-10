@@ -47,7 +47,7 @@ namespace json {
 		//支持vector和map形式的append
 		//vector/array
 		void append(const Json&);
-		void append(const Json&&);
+		void append(const Json&&) noexcept;
 		//map/object
 		void append(const char*, const Json&);
 		void append(const char*, const Json&&);
@@ -66,11 +66,11 @@ namespace json {
 		
 		//重载
 		void operator = (const Json&);
-		void operator = (const Json&&);
+		void operator = (const Json&&) noexcept;
 		bool operator == (const Json&);
-		bool operator == (const Json&&);
+		bool operator == (const Json&&) noexcept;
 		bool operator != (const Json&);
-		bool operator != (const Json&&);
+		bool operator != (const Json&&) noexcept;
 
 		bool isNull() const { return m_type == json_null; };
 		bool isBool() const { return m_type == json_bool; };
@@ -125,18 +125,18 @@ namespace json {
 		//复制和清空
 		//copy仅复制, 不考虑清空原有的内容
 		template<class T>
-		void __copy(const T&&);
+		void __copy(const T&&) noexcept;
 		void __clear();
 
 		//array与object判断是否相等
 		template<class T>
-		bool __array_is_equal(const T&&);
+		bool __array_is_equal(const T&&) noexcept;
 		template<class T>
 		bool __object_is_equal(const T&&);
 
 		//append_array
 		template<class C>
-		void __append_array(const C&&);
+		void __append_array(const C&&) noexcept;
 		//append_object
 		template<typename Ty, class C>
 		void __append_object(const Ty&&, const C&&);
