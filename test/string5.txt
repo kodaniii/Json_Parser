@@ -1,0 +1,1 @@
+{"append": [true, 123, 128.33, "nice day~"], "append2": "hello!", "array": [true, 123, 128.33, "nice day~"], "bool": true, "double": 256.99, "float": 128.33, "int": 128, "str": "this is string"}
